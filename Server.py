@@ -1,5 +1,4 @@
 import socket
-import time
 
 ip_port = ('127.0.0.1', 9999)
 sk = socket.socket()          
