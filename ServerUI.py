@@ -33,10 +33,8 @@ class con_thread(Thread):
         global sk,conn,address
         sk = socket.socket()
         sk.bind(ip_port)
-
         sk.listen(5)
         conn, address = sk.accept()
-        start_button.config(state = tk.NORMAL)
         global con_flag
         con_flag = 1
         connect_and_start = "[+] Connect\n"
@@ -47,6 +45,11 @@ class con_thread(Thread):
         connect_and_start += "[+] RHOST Port:"+str(address[1])+'\n'
         connect_and_start += "[+] Can Type Command!"
         show_command.insert('end',connect_and_start + '\n')
+        show_connect_information.insert(1,str(address[0])+' : '+str(address[1]))
+        connect_button.config(state = tk.NORMAL)
+
+def build():
+    show_command.insert('end','\n')
 
 def help_button():
     show_help = "[+] Help:\n"
@@ -130,6 +133,6 @@ help_button = tk.Button(window,text='help',command=help_button)
 help_button.grid(row=3,column=5)
 show_connect_information = tk.Listbox(window)
 show_connect_information.grid(row=3,column=4,sticky=tk.S,ipadx=15,ipady=5,columnspan=2,padx=15)
-show_connect_information.insert(1,Lip)
-show_connect_information.insert(2,Lip)
+build_button = tk.Button(window,text='build client',command=build)
+build_button.grid(row=1,column=7,rowspan=2,ipady=5)
 window.mainloop()
