@@ -153,14 +153,27 @@ def send_command_fuc():
         show_command.insert('end',"Need Connect\n")
     elif con_flag == 1:
         show_something = enter_command.get()
+
+        for i in range(0,len(show_something)):
+            if show_something[i] == '|':
+                temp = i
+                find_start = 0
+                str_start = "start"
+                for j in range(4):
+                    temp = temp + 1
+                    if show_something[temp] == str_start[j]:
+                        find_start = find_start + 1
+                    if find_start == 5:
+                        break
+        
         show_command.insert('end',show_something+' command send \n')
         data = "echo [+] Command Send Done! && "+show_something
-        if data == "echo [+] Command Send Done! "+'&& exit':
+        if data == "echo [+] Command Send Done! && exit":
             conn.send(data.encode())
             show_command.insert('end',"[X] Connect Close"+'\n')
             show_command.see('end')
             conn.close()
-        elif data.split(' ')[6] == 'start':
+        elif (data.split(' ')[6] == 'start')|(find_start == 5):
             conn.send(data.encode())
             show_command.insert('end','send start!'+'\n')
             show_command.see('end')
