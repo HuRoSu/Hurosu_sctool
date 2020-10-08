@@ -73,7 +73,7 @@ def reload_button():
         start_flag = 0
         con_flag = 0
         be_con = 0
-        reload_con = 'exit'+" && echo [+] Command Request Done!"
+        reload_con = "echo [+] Command Request Done! && exit"
         conn.send(reload_con.encode())
         conn.close()
         show_command.insert('end',"[X] Connect Close"+'\n')
