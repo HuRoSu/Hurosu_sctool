@@ -173,10 +173,10 @@ def send_command_fuc():
             show_command.insert('end',"[X] Connect Close"+'\n')
             show_command.see('end')
             conn.close()
-        elif (data.split(' ')[6] == 'start')|(find_start == 5):
-            conn.send(data.encode())
-            show_command.insert('end','send start!'+'\n')
-            show_command.see('end')
+#        elif (data.split(' ')[6] == 'start')|(find_start == 5):
+#            conn.send(data.encode())
+#            show_command.insert('end','send start!'+'\n')
+#            show_command.see('end')
         elif data != '':
             conn.send(data.encode())
 #            conn.setblocking(False)
