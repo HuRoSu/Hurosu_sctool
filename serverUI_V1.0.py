@@ -99,6 +99,8 @@ def help_button():
     show_help += "[+] If connect done, can type command and Send command\n\n"
     show_help += "[+] If need reload lhost IP or Port can click reload button\n\n"
     show_help += "[!] Reload Button will disconnect target!\n\n"
+    show_help += "[!] Response Need type show before command\n\n"
+    show_help += "[+] ex:show dir\n\n"
     show_help += "\n\n\n\n"
     show_help += "Version: v1.0\n"
     show_command.insert('end',show_help + '\n')
@@ -177,11 +179,15 @@ def send_command_fuc():
 #            conn.send(data.encode())
 #            show_command.insert('end','send start!'+'\n')
 #            show_command.see('end')
-        elif data != '':
+        elif (data.split(' '))[6] == 'show':
             conn.send(data.encode())
 #            conn.setblocking(False)
             show_command.insert('end',(conn.recv(4096).decode('big5'))+'\n')
             show_command.insert('end',"[+] Command Request Done!"+'\n')
+            show_command.see('end')
+        elif data != '':
+            conn.send(data.encode())
+            show_command.insert('end',"[+] Command Send!"+'\n')
             show_command.see('end')
         elif data == 'echo [+] Command Send Done! &&':
             show_command.insert('end',"pls enter"+'\n')
@@ -217,7 +223,7 @@ window = tk.Tk()
 window.geometry('800x500')
 window.configure(bg='#000000')
 window.title("SCtool- created by hurosu")
-command_text = tk.Label(window,text="command:",font = ('Algerian',10),fg='#FFFFFF',bg='#000000').grid(row=1)
+command_text = tk.Label(window,text="command:",font = ('Algerian',12),fg='#FFFFFF',bg='#000000').grid(row=1)
 enter_command = tk.Entry(window,show = None)
 enter_command.grid(row=1,column=1)
 enter_command.configure(bg='#303030',fg='#0af000')
